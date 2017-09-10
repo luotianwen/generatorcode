@@ -1,0 +1,25 @@
+<#assign className = table.className>   
+<#assign classNameLower = className?uncap_first> 
+<action name="${className}" class="com.kkgame.feeop.${namespace}.action.${className}Action" method="do{1}">
+			<result name="list">/pages/${namespace}/${classNameLower}_list.jsp</result>
+			<result name="create">/pages/${namespace}/${classNameLower}_create.jsp</result>
+			<result name="detail">/pages/${namespace}/${classNameLower}_detail.jsp</result>
+		</action>
+		
+	<sqlMap resource="com/kkgame/feeop/${namespace}/dao/impl/maps/${className}.xml"/>	
+		
+		<bean id="${classNameLower}Service" class="com.kkgame.feeop.${namespace}.service.impl.${className}ServiceImpl">
+ 		<property name="${classNameLower}DAO" ref="${classNameLower}DAO"></property>
+ 	</bean>
+ 	<bean id="${classNameLower}DAO" class="com.kkgame.feeop.${namespace}.dao.impl.${className}DAOImpl">
+ 		<property name="sqlMapClient" ref="sqlMapClient_kkpay_fee"></property>
+ 		<property name="dataSource" ref="dataSource_kkpay_fee"></property>
+ 	</bean>
+ 	
+ <authz:Permission resName="RES_${className}_LIST">
+						<li><a href="javascript: mainLoadData('<%=request.getContextPath() %>/${namespace}/${className}!list.action',216)">降低资费配置列表</a></li>
+</authz:Permission>
+
+	if(flag==215) {
+		$("#breadcrumb").html("<a href=\"#\" title=\"首页\" class=\"tip-bottom\"><i class=\"icon-home\"></i>渠道中心</a><a href=\"#\" class=\"current\">精确配置列表</a>");
+	}

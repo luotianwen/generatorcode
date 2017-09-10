@@ -1,0 +1,83 @@
+<#assign className = table.className>   
+<#assign classNameLower = className?uncap_first> 
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="${classNameLower}SqlMap">
+	<typeAlias alias="${classNameLower}VO" type="${basepackage}.bean.${className}VO"/>
+	<select id="get${className}VOListCount" parameterClass="${classNameLower}VO" resultClass="int">
+		SELECT
+		count(id)
+	        FROM ${table.sqlName} 
+	        <dynamic prepend="WHERE">
+	       <#list table.columns as column>
+		        
+		       <isNotEmpty prepend="AND" property="${column.columnNameLower}">
+		             ${column.sqlName} = #${column.columnNameLower}#
+		       </isNotEmpty>
+				 
+	       </#list>
+	    </dynamic>	
+	</select>
+	<select id="get${className}VOList" parameterClass="${classNameLower}VO" resultClass="${classNameLower}VO">
+		  SELECT
+		<![CDATA[
+        <#list table.columns as column>${column.sqlName} <#if column_has_next>,</#if></#list>
+	    ]]>
+		  FROM ${table.sqlName} 
+		WHERE 1=1
+	      
+	        <dynamic prepend="WHERE">
+	       <#list table.columns as column>
+		         
+		       <isNotEmpty prepend="AND" property="${column.columnNameLower}">
+		             ${column.sqlName} = #${column.columnNameLower}#
+		       </isNotEmpty>
+				 
+	       </#list>
+	    </dynamic>	
+	    
+    	<![CDATA[ LIMIT  #page.index#, #page.pageSize# ]]> 
+	</select>
+	 
+	<select id="get${className}VO" parameterClass="${classNameLower}VO" resultClass="${classNameLower}VO">
+		SELECT
+		 <![CDATA[
+        <#list table.columns as column>${column.sqlName} <#if column_has_next>,</#if></#list>
+	    
+	        FROM ${table.sqlName} 
+	        WHERE 
+				<#list table.compositeIdColumns as column>
+		        ${column.sqlName} = #${column.columnNameLower}# <#if column_has_next> AND </#if>
+		        </#list>
+	    ]]>
+	</select>
+	<insert id="create" parameterClass="${classNameLower}VO">
+		 <![CDATA[
+        INSERT INTO ${table.sqlName} (
+        <#list table.columns as column>
+        	${column.sqlName} <#if column_has_next>,</#if>
+        </#list>
+        ) VALUES (
+        <#list table.columns as column>
+        	#${column.columnNameLower}# <#if column_has_next>,</#if>
+        </#list>        
+        )
+    ]]>
+		<selectKey keyProperty="id" resultClass="int">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+	</insert>
+	<update id="update" parameterClass="${classNameLower}VO">
+		<![CDATA[
+        UPDATE ${table.sqlName} SET
+	        <#list table.notPkColumns as column>
+	        ${column.sqlName} = #${column.columnNameLower}# <#if column_has_next>,</#if>
+	        </#list>
+        WHERE 
+        	<#list table.compositeIdColumns as column>
+	        ${column.sqlName} = #${column.columnNameLower}# <#if column_has_next> AND </#if>
+	        </#list>
+    ]]>
+	</update>
+	 
+</sqlMap>
